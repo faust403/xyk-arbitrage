@@ -13,6 +13,11 @@ pub enum LoggerTitle {
     YellowstoneStreamClosed,
     YellowstoneStreamError,
 
+    /* Discovery */
+    DiscoveryQueueFull,
+    DiscoveryQueueClosed,
+    DiscoveryHandleError,
+
     AppStarting,
 }
 

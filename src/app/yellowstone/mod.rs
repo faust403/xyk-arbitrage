@@ -88,7 +88,7 @@ impl YellowstoneApp {
         })
     }
 
-    pub async fn get_subscription_request(&self) -> SubscribeRequest {
+    pub fn get_subscription_request(&self) -> SubscribeRequest {
         self.request.clone()
     }
 

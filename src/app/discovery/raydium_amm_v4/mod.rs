@@ -2,8 +2,8 @@ use crate::app::discovery::ProgramTransactionDiscovery;
 use anyhow::Result;
 use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_pubkey::Pubkey;
-use std::sync::Arc;
 use solana_sdk::bs58;
+use std::sync::Arc;
 use yellowstone_grpc_proto::geyser::SubscribeUpdateTransaction;
 use yellowstone_grpc_proto::tonic::async_trait;
 

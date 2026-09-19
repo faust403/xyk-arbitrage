@@ -11,7 +11,8 @@ use config::Config;
 use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_client::rpc_config::CommitmentConfig;
 use std::ops::Deref;
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
+use tokio::sync::Mutex;
 use yellowstone::StreamEnded;
 use yellowstone::YellowstoneApp;
 use yellowstone_grpc_proto::geyser::SubscribeUpdate;
@@ -21,15 +22,15 @@ pub struct App {
     /* Only used to rebuild the yellowstone app */
     config: Config,
     /* Only responsible for safe delivery of the subscription updates */
-    yellowstone: Arc<RwLock<YellowstoneApp>>,
+    yellowstone: Arc<Mutex<YellowstoneApp>>,
     /* This app takes the transaction update and parses it to discover a new pool.
     After discovery, it rebuilds the SubscribeRequest and sends it again into the sink */
-    discovery: DiscoveryApp,
+    discovery: Arc<DiscoveryApp>,
 }
 
 impl App {
     pub async fn new(config: Config) -> Result<Self> {
-        let yellowstone = Arc::new(RwLock::new(
+        let yellowstone = Arc::new(Mutex::new(
             YellowstoneApp::new(&config.yellowstone, config.discovery.programs.clone()).await?,
         ));
         let rpc = Arc::new(RpcClient::new_with_commitment(
@@ -45,12 +46,9 @@ impl App {
 
     pub async fn run(&mut self) {
         loop {
-            let result = match self.yellowstone.write() {
-                Ok(mut lock) => lock.next().await,
-                Err(_) => continue,
-            };
+            let result = self.yellowstone.lock().await.next().await;
             match result {
-                Ok(update) => self.handle_update(update).await,
+                Ok(update) => self.handle_update(update),
                 Err(ended) => {
                     match ended {
                         /* No update arrived for STREAM_IDLE_TIMEOUT */
@@ -73,14 +71,12 @@ impl App {
         }
     }
 
-    async fn handle_update(&mut self, update: SubscribeUpdate) {
+    fn handle_update(&self, update: SubscribeUpdate) {
         match update.update_oneof {
             /* We receive ping every ~10s, this does not need to be handled */
             Some(UpdateOneof::Ping(_)) => (),
             Some(UpdateOneof::Pong(_)) => (),
-            Some(UpdateOneof::Transaction(transaction)) => {
-                self.discovery.handle_update(transaction).await
-            }
+            Some(UpdateOneof::Transaction(transaction)) => self.discovery.push_update(transaction),
             Some(UpdateOneof::Account(_)) => (),
             /* The GeyserStream's AutoReconnect reads the slot from BlockMeta before
             it comes to us from .next() method. The reconnecting logic is hidden */

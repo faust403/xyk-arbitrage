@@ -2,32 +2,62 @@ pub mod config;
 mod raydium_amm_v4;
 
 use crate::app::yellowstone::YellowstoneApp;
+use crate::logger::LoggerTitle;
+use crate::logger::error;
+use crate::logger::warn;
 use anyhow::Result;
 use raydium_amm_v4::RaydiumAMMv4Discovery;
 use solana_client::nonblocking::rpc_client::RpcClient;
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
+use tokio::sync::Mutex;
+use tokio::sync::mpsc;
+use tokio::sync::mpsc::Receiver;
+use tokio::sync::mpsc::Sender;
+use tokio::sync::mpsc::error::TrySendError;
 use yellowstone_grpc_proto::geyser::SubscribeUpdateTransaction;
 use yellowstone_grpc_proto::tonic::async_trait;
 
+pub const QUEUE_CAPACITY: usize = 100_000;
+
 pub struct DiscoveryApp {
-    yellowstone: Arc<RwLock<YellowstoneApp>>,
+    yellowstone: Arc<Mutex<YellowstoneApp>>,
     transaction_discovery: Vec<Box<dyn ProgramTransactionDiscovery>>,
+
+    sender: Sender<SubscribeUpdateTransaction>,
 }
 
 impl DiscoveryApp {
-    pub fn new(rpc: Arc<RpcClient>, yellowstone: Arc<RwLock<YellowstoneApp>>) -> Result<Self> {
-        Ok(Self {
+    pub fn new(rpc: Arc<RpcClient>, yellowstone: Arc<Mutex<YellowstoneApp>>) -> Result<Arc<Self>> {
+        let (sender, receiver) = mpsc::channel(QUEUE_CAPACITY);
+        let app = Arc::new(Self {
             yellowstone,
             transaction_discovery: vec![Box::new(RaydiumAMMv4Discovery::new(rpc.clone())?)],
-        })
+            sender,
+        });
+        tokio::spawn(app.clone().run(receiver));
+        Ok(app)
     }
 
-    pub async fn handle_update(&self, transaction: SubscribeUpdateTransaction) {
-        for td in &self.transaction_discovery {
-            let result = td.handle(transaction.clone()).await;
-            match result {
-                Ok(_) => (),
-                Err(_) => (),
+    pub fn push_update(&self, transaction: SubscribeUpdateTransaction) {
+        match self.sender.try_send(transaction) {
+            Ok(()) => (),
+            /* This is fine for us to sometimes miss the new pools.
+            Maybe if we see them once in a week, then they aren't worth it? */
+            Err(TrySendError::Full(_)) => warn(LoggerTitle::DiscoveryQueueFull, None::<String>),
+            /* Normally should no happen */
+            Err(TrySendError::Closed(_)) => {
+                error(LoggerTitle::DiscoveryQueueClosed, None::<String>)
+            }
+        }
+    }
+
+    async fn run(self: Arc<Self>, mut receiver: Receiver<SubscribeUpdateTransaction>) {
+        while let Some(transaction) = receiver.recv().await {
+            for discovery in &self.transaction_discovery {
+                match discovery.handle(transaction.clone()).await {
+                    Ok(_pools) => (),
+                    Err(e) => error(LoggerTitle::DiscoveryHandleError, Some(e.to_string())),
+                }
             }
         }
     }
