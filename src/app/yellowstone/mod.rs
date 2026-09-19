@@ -9,7 +9,6 @@ use tokio::time::timeout;
 use yellowstone_grpc_client::GeyserStream;
 use yellowstone_grpc_client::ReconnectConfig;
 use yellowstone_grpc_client::{GeyserGrpcClient, SubscribeRequestSink};
-use yellowstone_grpc_proto::geyser::SubscribeRequestFilterAccounts;
 use yellowstone_grpc_proto::geyser::SubscribeRequestFilterBlocksMeta;
 use yellowstone_grpc_proto::geyser::SubscribeUpdate;
 use yellowstone_grpc_proto::geyser::{SubscribeRequest, SubscribeRequestFilterTransactions};
@@ -41,11 +40,7 @@ pub enum StreamEnded {
 }
 
 impl YellowstoneApp {
-    pub async fn new(
-        config: &YellowstoneConfig,
-        programs: Vec<String>,
-        accounts: Vec<String>,
-    ) -> Result<Self> {
+    pub async fn new(config: &YellowstoneConfig, programs: Vec<String>) -> Result<Self> {
         let mut client = GeyserGrpcClient::build_from_shared(config.grpc.clone())?
             .x_token(config.x_token.clone())?
             .tls_config(ClientTlsConfig::new().with_native_roots())?
@@ -72,14 +67,6 @@ impl YellowstoneApp {
                     account_required: vec![],
                     cuckoo_account_include: None,
                     token_accounts: None,
-                },
-            )]),
-            /* We track the leg states to calculate the price offchain */
-            accounts: HashMap::from([(
-                ACCOUNTS_LABEL.to_string(),
-                SubscribeRequestFilterAccounts {
-                    account: accounts.clone(),
-                    ..Default::default()
                 },
             )]),
             /* Helps to keep track of the latest slot */

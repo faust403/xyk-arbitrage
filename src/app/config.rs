@@ -1,9 +1,11 @@
 use super::yellowstone::config::YellowstoneConfig;
+use crate::app::discovery::config::DiscoveryConfig;
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
     pub yellowstone: YellowstoneConfig,
+    pub discovery: DiscoveryConfig,
 }
 
 impl Config {

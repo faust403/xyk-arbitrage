@@ -8,6 +8,8 @@ use crate::logger::error;
 use crate::logger::warn;
 use anyhow::Result;
 use config::Config;
+use solana_client::nonblocking::rpc_client::RpcClient;
+use solana_client::rpc_config::CommitmentConfig;
 use std::ops::Deref;
 use std::sync::{Arc, RwLock};
 use yellowstone::StreamEnded;
@@ -28,16 +30,15 @@ pub struct App {
 impl App {
     pub async fn new(config: Config) -> Result<Self> {
         let yellowstone = Arc::new(RwLock::new(
-            YellowstoneApp::new(
-                &config.yellowstone,
-                vec!["675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8".to_string()],
-                vec![],
-            )
-            .await?,
+            YellowstoneApp::new(&config.yellowstone, config.discovery.programs.clone()).await?,
+        ));
+        let rpc = Arc::new(RpcClient::new_with_commitment(
+            config.discovery.rpc.clone(),
+            CommitmentConfig::confirmed(),
         ));
         Ok(Self {
             yellowstone: yellowstone.clone(),
-            discovery: DiscoveryApp::new(yellowstone),
+            discovery: DiscoveryApp::new(rpc, yellowstone)?,
             config,
         })
     }
@@ -49,7 +50,7 @@ impl App {
                 Err(_) => continue,
             };
             match result {
-                Ok(update) => self.handle_update(update),
+                Ok(update) => self.handle_update(update).await,
                 Err(ended) => {
                     match ended {
                         /* No update arrived for STREAM_IDLE_TIMEOUT */
@@ -72,13 +73,13 @@ impl App {
         }
     }
 
-    fn handle_update(&mut self, update: SubscribeUpdate) {
+    async fn handle_update(&mut self, update: SubscribeUpdate) {
         match update.update_oneof {
             /* We receive ping every ~10s, this does not need to be handled */
             Some(UpdateOneof::Ping(_)) => (),
             Some(UpdateOneof::Pong(_)) => (),
             Some(UpdateOneof::Transaction(transaction)) => {
-                self.discovery.handle_update(transaction)
+                self.discovery.handle_update(transaction).await
             }
             Some(UpdateOneof::Account(_)) => (),
             /* The GeyserStream's AutoReconnect reads the slot from BlockMeta before
