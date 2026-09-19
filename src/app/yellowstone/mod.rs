@@ -41,18 +41,6 @@ pub enum StreamEnded {
 
 impl YellowstoneApp {
     pub async fn new(config: &YellowstoneConfig, programs: Vec<String>) -> Result<Self> {
-        let mut client = GeyserGrpcClient::build_from_shared(config.grpc.clone())?
-            .x_token(config.x_token.clone())?
-            .tls_config(ClientTlsConfig::new().with_native_roots())?
-            /* how often to ping */
-            .http2_keep_alive_interval(HTTP2_KEEP_ALIVE_INTERVAL)
-            /* how long to wait for the answer before declaring death */
-            .keep_alive_timeout(HTTP2_KEEP_ALIVE_TIMEOUT)
-            /* ping even when no data is flowing */
-            .keep_alive_while_idle(true)
-            .set_reconnect_config(ReconnectConfig::default())
-            .connect()
-            .await?;
         let request = SubscribeRequest {
             /* We track the txs on programs to discover new pools and legs.
             These updates are all going to the dispatcher to update .accounts */
@@ -77,9 +65,25 @@ impl YellowstoneApp {
             commitment: Some(config.commitment_from_str() as i32),
             ..Default::default()
         };
-        if request.encode_to_vec().len() >= MAX_SUBSCRIPTION_REQUEST_SIZE {
+        Self::open(config, request).await
+    }
+
+    pub async fn open(config: &YellowstoneConfig, request: SubscribeRequest) -> Result<Self> {
+        if request.encoded_len() >= MAX_SUBSCRIPTION_REQUEST_SIZE {
             return Err(anyhow!("Subscription request is too large"));
         }
+        let mut client = GeyserGrpcClient::build_from_shared(config.grpc.clone())?
+            .x_token(config.x_token.clone())?
+            .tls_config(ClientTlsConfig::new().with_native_roots())?
+            /* how often to ping */
+            .http2_keep_alive_interval(HTTP2_KEEP_ALIVE_INTERVAL)
+            /* how long to wait for the answer before declaring death */
+            .keep_alive_timeout(HTTP2_KEEP_ALIVE_TIMEOUT)
+            /* ping even when no data is flowing */
+            .keep_alive_while_idle(true)
+            .set_reconnect_config(ReconnectConfig::default())
+            .connect()
+            .await?;
         let (sink, stream) = client.subscribe_with_request(Some(request.clone())).await?;
         Ok(Self {
             sink,
@@ -92,12 +96,14 @@ impl YellowstoneApp {
         self.request.clone()
     }
 
-    pub async fn set_subscription_request(&mut self, request: SubscribeRequest) -> Result<()> {
-        if request.encode_to_vec().len() >= MAX_SUBSCRIPTION_REQUEST_SIZE {
+    pub async fn set_subscription_request(&mut self, request: SubscribeRequest) -> Result<usize> {
+        let size = request.encoded_len();
+        if size >= MAX_SUBSCRIPTION_REQUEST_SIZE {
             return Err(anyhow!("Subscription request is too large"));
         }
-        self.sink.send(request).await?;
-        Ok(())
+        self.sink.send(request.clone()).await?;
+        self.request = request;
+        Ok(size)
     }
 
     pub async fn next(&mut self) -> Result<SubscribeUpdate, StreamEnded> {

@@ -1,22 +1,17 @@
 use crate::app::discovery::ProgramTransactionDiscovery;
 use anyhow::Result;
-use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_pubkey::Pubkey;
-use solana_sdk::bs58;
-use std::sync::Arc;
 use yellowstone_grpc_proto::geyser::SubscribeUpdateTransaction;
 use yellowstone_grpc_proto::tonic::async_trait;
 
 pub const PROGRAM_ID: Pubkey =
     Pubkey::from_str_const("675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8");
 
-pub struct RaydiumAMMv4Discovery {
-    rpc: Arc<RpcClient>,
-}
+pub struct RaydiumAMMv4Discovery {}
 
 impl RaydiumAMMv4Discovery {
-    pub fn new(rpc: Arc<RpcClient>) -> Result<Self> {
-        Ok(Self { rpc })
+    pub fn new() -> Result<Self> {
+        Ok(Self {})
     }
 }
 
@@ -67,11 +62,6 @@ impl ProgramTransactionDiscovery for RaydiumAMMv4Discovery {
                 pools.push(pool);
             }
         }
-        println!(
-            "{:?} {:?}",
-            bs58::encode(&update.transaction.unwrap().signature).into_string(),
-            pools
-        );
         Ok(pools)
     }
 }

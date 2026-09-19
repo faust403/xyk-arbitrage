@@ -5,14 +5,14 @@ pub mod yellowstone;
 use crate::app::discovery::DiscoveryApp;
 use crate::logger::LoggerTitle;
 use crate::logger::error;
+use crate::logger::info;
 use crate::logger::warn;
 use anyhow::Result;
 use config::Config;
-use dashmap::DashSet;
-use solana_client::nonblocking::rpc_client::RpcClient;
-use solana_client::rpc_config::CommitmentConfig;
 use std::sync::Arc;
 use tokio::sync::Mutex;
+use tokio::time::sleep;
+use yellowstone::BACKOFF;
 use yellowstone::StreamEnded;
 use yellowstone::YellowstoneApp;
 use yellowstone_grpc_proto::geyser::SubscribeUpdate;
@@ -26,8 +26,6 @@ pub struct App {
     /* This app takes the transaction update and parses it to discover a new pool.
     After discovery, it rebuilds the SubscribeRequest and sends it again into the sink */
     discovery: Arc<DiscoveryApp>,
-    /**/
-    raydium_pools: Arc<DashSet<String>>,
 }
 
 impl App {
@@ -35,15 +33,9 @@ impl App {
         let yellowstone = Arc::new(Mutex::new(
             YellowstoneApp::new(&config.yellowstone, config.discovery.programs.clone()).await?,
         ));
-        let rpc = Arc::new(RpcClient::new_with_commitment(
-            config.discovery.rpc.clone(),
-            CommitmentConfig::confirmed(),
-        ));
-        let raydium_pools = Arc::new(DashSet::new());
         Ok(Self {
-            raydium_pools: raydium_pools.clone(),
             yellowstone: yellowstone.clone(),
-            discovery: DiscoveryApp::new(rpc, yellowstone, raydium_pools)?,
+            discovery: DiscoveryApp::new(yellowstone)?,
             config,
         })
     }
@@ -69,7 +61,29 @@ impl App {
                             Some(status.to_string()),
                         ),
                     }
-                    break;
+                    self.reconnect().await;
+                }
+            }
+        }
+    }
+
+    async fn reconnect(&self) {
+        /* The client's own ReconnectConfig absorbs transport blips; this loop covers the cases
+        where it gave up. Reusing the last request keeps every pool discovered so far subscribed */
+        loop {
+            let request = self.yellowstone.lock().await.get_subscription_request();
+            match YellowstoneApp::open(&self.config.yellowstone, request).await {
+                Ok(yellowstone) => {
+                    *self.yellowstone.lock().await = yellowstone;
+                    info(LoggerTitle::YellowstoneStreamReconnected, None::<String>);
+                    return;
+                }
+                Err(e) => {
+                    error(
+                        LoggerTitle::YellowstoneConnectionRejected,
+                        Some(e.to_string()),
+                    );
+                    sleep(BACKOFF).await;
                 }
             }
         }

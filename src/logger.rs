@@ -12,6 +12,8 @@ pub enum LoggerTitle {
     YellowstoneEndpointSilence,
     YellowstoneStreamClosed,
     YellowstoneStreamError,
+    YellowstoneResubscribed,
+    YellowstoneResubscribeError,
 
     /* Discovery */
     DiscoveryQueueFull,
