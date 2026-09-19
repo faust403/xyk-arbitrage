@@ -3,6 +3,7 @@ mod discovery;
 pub mod yellowstone;
 
 use crate::app::discovery::DiscoveryApp;
+use crate::app::discovery::DiscoveryUpdate;
 use crate::logger::LoggerTitle;
 use crate::logger::error;
 use crate::logger::info;
@@ -94,8 +95,12 @@ impl App {
             /* We receive ping every ~10s, this does not need to be handled */
             Some(UpdateOneof::Ping(_)) => (),
             Some(UpdateOneof::Pong(_)) => (),
-            Some(UpdateOneof::Transaction(transaction)) => self.discovery.push_update(transaction),
-            Some(UpdateOneof::Account(_)) => (),
+            Some(UpdateOneof::Transaction(transaction)) => self
+                .discovery
+                .push_update(DiscoveryUpdate::Transaction(transaction)),
+            Some(UpdateOneof::Account(account)) => self
+                .discovery
+                .push_update(DiscoveryUpdate::Account(account)),
             /* The GeyserStream's AutoReconnect reads the slot from BlockMeta before
             it comes to us from .next() method. The reconnecting logic is hidden */
             Some(UpdateOneof::BlockMeta(_)) => (),

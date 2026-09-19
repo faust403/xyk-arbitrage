@@ -19,6 +19,7 @@ use tokio::sync::mpsc::Receiver;
 use tokio::sync::mpsc::Sender;
 use tokio::sync::mpsc::error::TrySendError;
 use valuable::Valuable;
+use yellowstone_grpc_proto::geyser::SubscribeUpdateAccount;
 use yellowstone_grpc_proto::geyser::SubscribeUpdateTransaction;
 use yellowstone_grpc_proto::tonic::async_trait;
 
@@ -28,7 +29,13 @@ pub const RESUBSCRIBE_INTERVAL: Duration = Duration::from_secs(10);
 pub struct DiscoveryApp {
     yellowstone: Arc<Mutex<YellowstoneApp>>,
     transaction_discovery: Vec<Box<dyn ProgramTransactionDiscovery>>,
-    sender: Sender<SubscribeUpdateTransaction>,
+    account_discovery: Vec<Box<dyn ProgramAccountDiscovery>>,
+    sender: Sender<DiscoveryUpdate>,
+}
+
+pub enum DiscoveryUpdate {
+    Transaction(SubscribeUpdateTransaction),
+    Account(SubscribeUpdateAccount),
 }
 
 impl DiscoveryApp {
@@ -37,14 +44,15 @@ impl DiscoveryApp {
         let app = Arc::new(Self {
             yellowstone,
             transaction_discovery: vec![Box::new(RaydiumAMMv4Discovery::new()?)],
+            account_discovery: vec![Box::new(RaydiumAMMv4Discovery::new()?)],
             sender,
         });
         tokio::spawn(app.clone().run(receiver));
         Ok(app)
     }
 
-    pub fn push_update(&self, transaction: SubscribeUpdateTransaction) {
-        match self.sender.try_send(transaction) {
+    pub fn push_update(&self, update: DiscoveryUpdate) {
+        match self.sender.try_send(update) {
             Ok(()) => (),
             /* This is fine for us to sometimes miss the new pools.
             Maybe if we see them once in a week, then they aren't worth it? */
@@ -56,16 +64,26 @@ impl DiscoveryApp {
         }
     }
 
-    async fn run(self: Arc<Self>, mut receiver: Receiver<SubscribeUpdateTransaction>) {
+    async fn run(self: Arc<Self>, mut receiver: Receiver<DiscoveryUpdate>) {
         let mut resubscribed = Instant::now();
         let mut pending = HashSet::new();
-        while let Some(transaction) = receiver.recv().await {
-            for discovery in &self.transaction_discovery {
-                match discovery.handle(transaction.clone()).await {
-                    Ok(pools) => {
-                        pending.extend(pools);
+        while let Some(update) = receiver.recv().await {
+            match update {
+                DiscoveryUpdate::Transaction(transaction) => {
+                    for discovery in &self.transaction_discovery {
+                        match discovery.handle(transaction.clone()).await {
+                            Ok(pools) => pending.extend(pools),
+                            Err(e) => error(LoggerTitle::DiscoveryHandleError, Some(e.to_string())),
+                        }
                     }
-                    Err(e) => error(LoggerTitle::DiscoveryHandleError, Some(e.to_string())),
+                }
+                DiscoveryUpdate::Account(account) => {
+                    for discovery in &self.account_discovery {
+                        match discovery.handle(&account) {
+                            Ok(accounts) => pending.extend(accounts),
+                            Err(e) => error(LoggerTitle::DiscoveryHandleError, Some(e.to_string())),
+                        }
+                    }
                 }
             }
             /* New pools arrive with almost every transaction at startup, so resubscribing
@@ -135,4 +153,8 @@ struct YellowstoneResubscribedLog {
 #[async_trait]
 pub trait ProgramTransactionDiscovery: Send + Sync {
     async fn handle(&self, update: SubscribeUpdateTransaction) -> Result<Vec<String>>;
+}
+
+pub trait ProgramAccountDiscovery: Send + Sync {
+    fn handle(&self, update: &SubscribeUpdateAccount) -> Result<Vec<String>>;
 }
