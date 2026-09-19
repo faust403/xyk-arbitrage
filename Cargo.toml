@@ -18,6 +18,7 @@ yellowstone-grpc-proto = "12.5.0"
 futures = "0.3.34"
 solana-sdk = "4.0.1"
 solana-client = "4.2.2"
+dashmap = "6.2.1"
 
 [profile.release]
 overflow-checks = true

@@ -8,9 +8,9 @@ use crate::logger::error;
 use crate::logger::warn;
 use anyhow::Result;
 use config::Config;
+use dashmap::DashSet;
 use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_client::rpc_config::CommitmentConfig;
-use std::ops::Deref;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use yellowstone::StreamEnded;
@@ -26,6 +26,8 @@ pub struct App {
     /* This app takes the transaction update and parses it to discover a new pool.
     After discovery, it rebuilds the SubscribeRequest and sends it again into the sink */
     discovery: Arc<DiscoveryApp>,
+    /**/
+    raydium_pools: Arc<DashSet<String>>,
 }
 
 impl App {
@@ -37,9 +39,11 @@ impl App {
             config.discovery.rpc.clone(),
             CommitmentConfig::confirmed(),
         ));
+        let raydium_pools = Arc::new(DashSet::new());
         Ok(Self {
+            raydium_pools: raydium_pools.clone(),
             yellowstone: yellowstone.clone(),
-            discovery: DiscoveryApp::new(rpc, yellowstone)?,
+            discovery: DiscoveryApp::new(rpc, yellowstone, raydium_pools)?,
             config,
         })
     }
