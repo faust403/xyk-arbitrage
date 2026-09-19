@@ -35,5 +35,5 @@ impl DiscoveryApp {
 
 #[async_trait]
 pub trait ProgramTransactionDiscovery: Send + Sync {
-    async fn handle(&self, update: SubscribeUpdateTransaction) -> Result<()>;
+    async fn handle(&self, update: SubscribeUpdateTransaction) -> Result<Vec<String>>;
 }
