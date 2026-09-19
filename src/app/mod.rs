@@ -1,0 +1,90 @@
+pub mod config;
+mod discovery;
+pub mod yellowstone;
+
+use crate::app::discovery::DiscoveryApp;
+use crate::logger::LoggerTitle;
+use crate::logger::error;
+use crate::logger::warn;
+use anyhow::Result;
+use config::Config;
+use std::ops::Deref;
+use std::sync::{Arc, RwLock};
+use yellowstone::StreamEnded;
+use yellowstone::YellowstoneApp;
+use yellowstone_grpc_proto::geyser::SubscribeUpdate;
+use yellowstone_grpc_proto::geyser::subscribe_update::UpdateOneof;
+
+pub struct App {
+    /* Only used to rebuild the yellowstone app */
+    config: Config,
+    /* Only responsible for safe delivery of the subscription updates */
+    yellowstone: Arc<RwLock<YellowstoneApp>>,
+    /* This app takes the transaction update and parses it to discover a new pool.
+    After discovery, it rebuilds the SubscribeRequest and sends it again into the sink */
+    discovery: DiscoveryApp,
+}
+
+impl App {
+    pub async fn new(config: Config) -> Result<Self> {
+        let yellowstone = Arc::new(RwLock::new(
+            YellowstoneApp::new(
+                &config.yellowstone,
+                vec!["675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8".to_string()],
+                vec![],
+            )
+            .await?,
+        ));
+        Ok(Self {
+            yellowstone: yellowstone.clone(),
+            discovery: DiscoveryApp::new(yellowstone),
+            config,
+        })
+    }
+
+    pub async fn run(&mut self) {
+        loop {
+            let result = match self.yellowstone.write() {
+                Ok(mut lock) => lock.next().await,
+                Err(_) => continue,
+            };
+            match result {
+                Ok(update) => self.handle_update(update),
+                Err(ended) => {
+                    match ended {
+                        /* No update arrived for STREAM_IDLE_TIMEOUT */
+                        StreamEnded::Idle => {
+                            error(LoggerTitle::YellowstoneEndpointSilence, None::<String>)
+                        }
+                        /* The server closed the stream */
+                        StreamEnded::Closed => {
+                            error(LoggerTitle::YellowstoneStreamClosed, None::<String>)
+                        }
+                        /* The stream yielded a transport error */
+                        StreamEnded::Failed(status) => error(
+                            LoggerTitle::YellowstoneStreamError,
+                            Some(status.to_string()),
+                        ),
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    fn handle_update(&mut self, update: SubscribeUpdate) {
+        match update.update_oneof {
+            /* We receive ping every ~10s, this does not need to be handled */
+            Some(UpdateOneof::Ping(_)) => (),
+            Some(UpdateOneof::Pong(_)) => (),
+            Some(UpdateOneof::Transaction(transaction)) => {
+                self.discovery.handle_update(transaction)
+            }
+            Some(UpdateOneof::Account(_)) => (),
+            /* The GeyserStream's AutoReconnect reads the slot from BlockMeta before
+            it comes to us from .next() method. The reconnecting logic is hidden */
+            Some(UpdateOneof::BlockMeta(_)) => (),
+            _ => warn(LoggerTitle::YellowstoneUnknownUpdate, None::<String>),
+        }
+    }
+}
