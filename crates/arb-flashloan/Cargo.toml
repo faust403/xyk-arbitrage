@@ -1,0 +1,19 @@
+[package]
+name        = "arb-flashloan"
+version     = { workspace = true }
+edition     = { workspace = true }
+rust-version = { workspace = true }
+license     = { workspace = true }
+publish     = { workspace = true }
+description = "Solend (Save Finance) flash-loan instruction builders. Pure functions, no RPC."
+
+[dependencies]
+arb-core       = { path = "../arb-core" }
+
+solana-program = { workspace = true }
+borsh          = { workspace = true }
+thiserror      = { workspace = true }
+tracing        = { workspace = true }
+
+[dev-dependencies]
+proptest       = { workspace = true }

@@ -1,0 +1,485 @@
+# Scout pool list — comprehensive SOL/USDC + USDC/USDT coverage
+# Sources: GeckoTerminal API (Solana network), verified May 2026.
+# Sorted within each section by 24h volume descending.
+#
+# Coverage philosophy:
+#   * Every supported DEX (Raydium AMM v4, Raydium CLMM, Orca Whirlpool,
+#     Meteora DLMM) gets all its top SOL/USDC pools.
+#   * Direction (SOL→USDC vs USDC→SOL) is handled automatically — Whirlpool/
+#     CLMM/DLMM all order mints by raw byte order on chain (SOL=0x06 < USDC=0xc6
+#     so token_a/0/x = SOL always); the route builder adds every pool to BOTH
+#     directions of the adjacency graph, so cycles in either direction are found.
+#   * USDC/USDT and other stable pairs included as "bridge" hops for 3-cycles.
+#
+# Excluded (not supported by current parsers):
+#   * Humidifi pools (different program) — Phase 12+ work
+#   * PancakeSwap V3 on Solana — different program
+#   * Raydium Stable Swap (`5quBt...` program, e.g. pool 2EXiumdi...) —
+#     different protocol from AMM v4 (Curve-style, not constant-product)
+#
+# Token mints (verified):
+#   USDC = EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
+#   USDT = Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB
+#   SOL  = So11111111111111111111111111111111111111112
+
+# ============================================================
+# ORCA WHIRLPOOL — SOL/USDC (4 pools)
+# ============================================================
+
+[[pools]]
+name    = "Orca Whirlpool SOL/USDC ($9M TVL, $164M/24h)"
+address = "FpCMFDFGYotvufJ7HrFHsWEiiQCGbkLCtwHiDnh7o28Q"
+dex     = "orca-whirlpool"
+
+[[pools]]
+name    = "Orca Whirlpool SOL/USDC (large — $29M TVL, $61M/24h)"
+address = "Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE"
+dex     = "orca-whirlpool"
+
+[[pools]]
+name    = "Orca Whirlpool SOL/USDC (mid — $236K TVL, $170K/24h)"
+address = "7qbRF6YsyGuLUVs6Y1q64bdVrfe4ZcUUz1JRdoVNUJnm"
+dex     = "orca-whirlpool"
+
+[[pools]]
+name    = "Orca Whirlpool SOL/USDC (small — $201K TVL, $5.5K/24h)"
+address = "HJPjoWUrhoZzkNfRpHuieeFk9WcZWjwy6PBjZ81ngndJ"
+dex     = "orca-whirlpool"
+
+# ============================================================
+# RAYDIUM AMM v4 — SOL/USDC + SOL/USDT
+# ============================================================
+
+[[pools]]
+name    = "Raydium AMM v4 SOL/USDC (main — $7.8M TVL, $592K/24h)"
+address = "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2"
+dex     = "raydium-amm-v4"
+
+[[pools]]
+name    = "Raydium AMM v4 SOL/USDT ($1.17M TVL, $71K/24h)"
+address = "7XawhbbxtsRcQA8KTkHT9f9nc6d69UwqCDh6U5EEbEmX"
+dex     = "raydium-amm-v4"
+
+[[pools]]
+name    = "Raydium AMM v4 RAY/USDT ($1.64M TVL, $393K/24h — bridge for 3-cycles)"
+address = "DVa7Qmb5ct9RCpaU7UTpSaf3GVMYz17vNVU67XpdCRut"
+dex     = "raydium-amm-v4"
+
+# ============================================================
+# RAYDIUM CLMM — SOL/USDC + USDC/USDT
+# ============================================================
+
+[[pools]]
+name    = "Raydium CLMM SOL/USDC ($6.7M TVL, $10M/24h)"
+address = "3ucNos4NbumPLZNWztqGHNFFgkHeRMBQAVemeeomsUxv"
+dex     = "raydium-clmm"
+
+[[pools]]
+name    = "Raydium CLMM USDC/USDT (0.01% tier, $9M TVL, $7.78M/24h)"
+address = "BZtgQEyS6eXUXicYPHecYQ7PybqodXQMvkjUbP4R8mUU"
+dex     = "raydium-clmm"
+
+[[pools]]
+name    = "Raydium CLMM USDC/USDT (0.05% tier, $50K TVL, $6.13K/24h)"
+address = "FPfbntAR84nyxfcmATEwYG55joLcPCxgYBC3BTPqB7yR"
+dex     = "raydium-clmm"
+
+[[pools]]
+name    = "Raydium CLMM SOL/USDT 0.01% ($18.5M/24h — top USDT venue)"
+address = "3nMFwZXwY1s1M5s8vYAHqd4wGs4iSxXE4LRoUMMYqEgF"
+dex     = "raydium-clmm"
+
+[[pools]]
+name    = "Raydium CLMM SOL/USDC (mid — $551K/24h)"
+address = "CYbD9RaToYMtWKA7QZyoLahnHdWq553Vm62Lh6qWtuxq"
+dex     = "raydium-clmm"
+
+[[pools]]
+name    = "Raydium CLMM SOL/USDC 0.01% ($259K/24h, low-fee venue)"
+address = "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj"
+dex     = "raydium-clmm"
+
+# ============================================================
+# METEORA DLMM — SOL/USDC (4 pools)
+# Re-enabled 2026-05-10 for Jupiter-routed dispatch path: scout uses these
+# to find candidate intermediates (SOL), Jupiter executor verifies via its
+# own aggregator. Native execution still disabled via NATIVE_DISABLE_*.
+# ============================================================
+
+[[pools]]
+name    = "Meteora DLMM SOL/USDC ($4.1M TVL, $21M/24h)"
+address = "5rCf1DM8LjKTw4YqhnoLcngyZYeNnQqztScTogYHAS6"
+dex     = "meteora-dlmm"
+
+[[pools]]
+name    = "Meteora DLMM SOL/USDC ($5.7M TVL, $9M/24h)"
+address = "BGm1tav58oGcsQJehL9WXBFXF7D27vZsKefj4xJKD5Y"
+dex     = "meteora-dlmm"
+
+[[pools]]
+name    = "Meteora DLMM SOL/USDC ($570K TVL, $9.8M/24h — fast venue)"
+address = "HTvjzsfX3yU6BUodCjZ5vZkUrAxMDTrBs3CJaq43ashR"
+dex     = "meteora-dlmm"
+
+[[pools]]
+name    = "Meteora DLMM SOL/USDC ($1.1M TVL, $2.7M/24h)"
+address = "HRYEjwdo3bZ1TpXKWKcezqiwSV2Ywuh4LxMa2PzoCnG6"
+dex     = "meteora-dlmm"
+
+# ============================================================
+# OBRIC V2 — re-enabled 2026-05-10
+# Obric is Pyth-anchored and refuses non-oracle swaps (error 6028) — so
+# we don't try to swap there natively. But scout still finds candidate
+# intermediates via Obric routes, which Jupiter executor verifies and
+# routes via the aggregator's broader pool universe.
+# ============================================================
+
+[[pools]]
+name    = "Obric V2 SOL/USDC (top by bigK)"
+address = "AvBSC1KmFNceHpD6jyyXBV6gMXFxZ8BJJ3HVUN8kCurJ"
+dex     = "obric-v2"
+
+[[pools]]
+name    = "Obric V2 SOL/USDC (high volume)"
+address = "ha6ob9camZC1cPrwzrpc4H5JBaEapQDsS9nmavVCEUU"
+dex     = "obric-v2"
+
+[[pools]]
+name    = "Obric V2 SOL/USDC (mid volume)"
+address = "3csCx7o3KCvpXeRZYjhCGrgXdKyjSgaqcirc5pZJUJCf"
+dex     = "obric-v2"
+
+# ============================================================
+# Bridge pools — USDC/USDT, USDT/SOL, JitoSOL/USDC for 3-hop cycles
+# ============================================================
+
+[[pools]]
+name    = "Orca Whirlpool USDC/USDT ($1.16M TVL, $1.2M/24h)"
+address = "4fuUiYxTQ6QCrdSq9ouBYcTM7bqSwYTSyLueGZLTy4T4"
+dex     = "orca-whirlpool"
+
+[[pools]]
+name    = "Orca Whirlpool USDT/SOL ($546K TVL, $262K/24h)"
+address = "FwewVm8u6tFPGewAyHmWAqad9hmF7mvqxK4mJ7iNqqGC"
+dex     = "orca-whirlpool"
+
+[[pools]]
+name    = "Orca Whirlpool JitoSOL/USDC ($83K TVL, $280K/24h)"
+address = "CxvWVYvvSymLWQNLqo61zjr1L86B4HpxoELbAAjxyb8H"
+dex     = "orca-whirlpool"
+
+# ============================================================
+# Niche / multi-venue pools — added 2026-05-10 for non-SOL/USDC arb
+# Selected from GeckoTerminal: tokens with 2+ pools across our DEXes
+# (Orca / Raydium AMM / Raydium CLMM) and balanced volume across venues.
+# Strategy: scout proposes intermediates here, Jupiter executor verifies
+# via aggregator. Native execution is gated off (`NATIVE_DISPATCH_DISABLED`).
+# ============================================================
+
+# JitoSOL — liquid staking, near-1.0 SOL parity, 3 venues, $1.7M+ daily
+[[pools]]
+name    = "Orca Whirlpool JitoSOL/SOL ($1.4M/24h — top LST venue)"
+address = "Hp53XEtt4S8SvPCXarsLSdGfZBuUr5mMmZmX2DRNXQKp"
+dex     = "orca-whirlpool"
+
+[[pools]]
+name    = "Raydium CLMM JitoSOL/SOL 0.01% ($184K/24h)"
+address = "2uoKbPEidR7KAMYtY4x7xdkHXWqYib5k4CutJauSL3Mc"
+dex     = "raydium-clmm"
+
+[[pools]]
+name    = "Orca Whirlpool USDC/JitoSOL ($142K/24h — second JitoSOL/USDC venue)"
+address = "5hWJUNTtEtKmKgDXpthJXXRRmJrz5vJ7uJzrUNVdrwLg"
+dex     = "orca-whirlpool"
+
+# WIF — memecoin, 2 strong venues with balanced ~$200-350K/24h
+[[pools]]
+name    = "Orca Whirlpool WIF/SOL ($348K/24h)"
+address = "D6NdKrKNQPmRZCCnG1GqXtF7MMoHB7qR6GU5TkG59Qz1"
+dex     = "orca-whirlpool"
+
+[[pools]]
+name    = "Raydium AMM v4 WIF/SOL ($208K/24h)"
+address = "EP2ib6dYdEeqD8MfE2ezHCxX3kP3K2eLKkirfPm5eyMx"
+dex     = "raydium-amm-v4"
+
+# JTO — governance, 3 venues across all our supported DEXes
+[[pools]]
+name    = "Orca Whirlpool JTO/SOL ($43K/24h)"
+address = "2UhFnySoJi6c89aydGAGS7ZRemo2dbkFRhvSJqDX4gHJ"
+dex     = "orca-whirlpool"
+
+[[pools]]
+name    = "Raydium CLMM JTO/SOL 1% ($30K/24h)"
+address = "JVoPtWWDsRcLvQosu5fWc2CaNF6jEtJzbxdPtcEuvZo"
+dex     = "raydium-clmm"
+
+[[pools]]
+name    = "Raydium CPMM JTO/SOL ($15K/24h — fixed: was incorrectly tagged as AMM v4)"
+address = "6pn9VbgHf9F31iiwUDuNJTWawYSt9Wwmh3oXqZubv9zZ"
+dex     = "raydium-cpmm"
+
+# ============================================================
+# Total: 17 pools across 4 DEXs.
+# Expected: ~3-7 SOL/USDC parallel quotes at any moment.
+# Subscription footprint: 17 pool accounts + ~3 vault accounts (Raydium AMM
+# v4 only) ≈ 20 WSS subscriptions. Easily under any Helius rate limit.
+# ============================================================
+
+# ============================================================
+# LST + meme + governance pools added 2026-05-11 to align with ALT
+# intermediate mints. Some pair only with SOL (bSOL, jupSOL, PYTH, JUP) and
+# won't form USDC-base 3-hop cycles by themselves — they exist for ALT
+# compression of Jupiter executor routes and for fluid 4-hop scouting if we
+# raise max_hops in the future. Pools verified on-chain by agent 2026-05-11.
+# ============================================================
+
+# mSOL — Marinade staked SOL
+[[pools]]
+name    = "Raydium CLMM mSOL/SOL ($1.1M TVL, $210K/24h)"
+address = "8EzbUfvcRT1Q6RL462ekGkgqbxsPmwC5FMLQZhSPMjJ3"
+dex     = "raydium-clmm"
+
+[[pools]]
+name    = "Orca Whirlpool mSOL/USDC ($140K TVL, $92K/24h)"
+address = "AqJ5JYNb7ApkJwvbuXxPnTtKeuizjvC1s2fkp382y9LC"
+dex     = "orca-whirlpool"
+
+[[pools]]
+name    = "Meteora DLMM mSOL/USDC ($178K TVL, $640K/24h)"
+address = "9X2A4DAeuQWwogVVBL4qgbuSkpcftGCjCpDvxJiSH465"
+dex     = "meteora-dlmm"
+
+# bSOL — BlazeStake staked SOL
+[[pools]]
+name    = "Orca Whirlpool bSOL/SOL ($627K TVL, $64K/24h)"
+address = "8phK65jxmTPEN158xLgSr4oZvssw9SyTErpNZj3g7px4"
+dex     = "orca-whirlpool"
+
+# jupSOL — Jupiter staked SOL
+[[pools]]
+name    = "Orca Whirlpool jupSOL/SOL ($396K TVL, $1.23M/24h)"
+address = "DtYKbQELgMZ3ihFUrCcCs9gy4djcUuhwgR7UpxVpP2Tg"
+dex     = "orca-whirlpool"
+
+[[pools]]
+name    = "Meteora DLMM jupSOL/jitoSOL ($409K TVL, $212K/24h)"
+address = "5cvcHrD2uh2CXhmZnMHsTVWJW1qtyikVaN3MCJNaCKMh"
+dex     = "meteora-dlmm"
+
+[[pools]]
+name    = "Meteora DLMM jupSOL/SOL ($85K TVL, $140K/24h)"
+address = "bNcdL9Hy85c9qb4hRavAUFtJUiyRPh3u96jerFqZQq6"
+dex     = "meteora-dlmm"
+
+# INF — Infinity LST aggregator
+[[pools]]
+name    = "Meteora DLMM INF/USDC ($566K TVL, $2K/24h)"
+address = "C1cq3X7JvzcWCLx6TXa9KEwMGmemK8WHXurh8bfjN73k"
+dex     = "meteora-dlmm"
+
+[[pools]]
+name    = "Orca Whirlpool INF/SOL ($209K TVL, $190K/24h)"
+address = "DxD41srN8Xk9QfYjdNXF9tTnP6qQxeF2bZF8s1eN62Pe"
+dex     = "orca-whirlpool"
+
+# BONK
+[[pools]]
+name    = "Orca Whirlpool BONK/SOL ($1.09M TVL, $35K/24h)"
+address = "3ne4mWqdYuNiYrYZC9TrA3FcfuFdErghH97vNPbjicr1"
+dex     = "orca-whirlpool"
+
+[[pools]]
+name    = "Meteora DLMM BONK/USDC ($237K TVL, $440K/24h)"
+address = "31p1hptjhFo6ZD8oBqkfutNXQKGGPyi7YcEAfsyKW777"
+dex     = "meteora-dlmm"
+
+[[pools]]
+name    = "Raydium CLMM BONK/USDC ($190K TVL, $180K/24h)"
+address = "3UwfrdLTpAjxTRni1boc5HUWe6hzc4HgE5yLdvEp2Noc"
+dex     = "raydium-clmm"
+
+# JUP — Jupiter governance
+[[pools]]
+name    = "Orca Whirlpool JUP/SOL ($408K TVL, $1.72M/24h)"
+address = "C1MgLojNLWBKADvu9BHdtgzz1oZX4dZ5zGdGcgvvW8Wz"
+dex     = "orca-whirlpool"
+
+[[pools]]
+name    = "Meteora DLMM JUP/jitoSOL ($425K TVL, $303K/24h)"
+address = "2QrWsSWrGvoAqkDC5XSGqjS752RWLaopqAaGrbugSxBL"
+dex     = "meteora-dlmm"
+
+# PYTH
+[[pools]]
+name    = "Raydium CLMM PYTH/SOL ($380K TVL, $386K/24h)"
+address = "9n3dSLrERZQp95dHXywft7xV8D8xnGFLaUHtEhQVaXaC"
+dex     = "raydium-clmm"
+
+# JLP — Jupiter Perps LP (deep liquidity, high volume)
+[[pools]]
+name    = "Orca Whirlpool JLP/SOL ($3.69M TVL, $3.49M/24h)"
+address = "6a3m2EgFFKfsFuQtP4LJJXPcAe3TQYXNyHUjjZpUxYgd"
+dex     = "orca-whirlpool"
+
+[[pools]]
+name    = "Orca Whirlpool JLP/USDC ($1.7M TVL, $3.07M/24h)"
+address = "HD8i7qr1hd9ida6sN71RbkLxbWcbvZS4NA5CY6vfcDpj"
+dex     = "orca-whirlpool"
+
+[[pools]]
+name    = "Meteora DLMM JLP/USDC ($2.06M TVL, $355K/24h)"
+address = "J27e5izvX4nbaaRDjMKv7DogQzcPidCAECxzE6rK4bF7"
+dex     = "meteora-dlmm"
+
+# W (Wormhole) — skipped: no pool >$50K TVL on supported DEXes.
+
+# ============================================================
+# MEMECOINS — top liquidity pools (2026-05-13)
+# Added for 5-hop arb routes. Sources: DexScreener Solana pairs API,
+# filtered to liquidity > $300K, dex in [raydium, orca, meteora].
+# These pools have $50K-$1.4M/24h volume — fertile ground for
+# small-spread arb (the niche where co-located searchers like
+# 6EvGY4FS... operate).
+# ============================================================
+
+[[pools]]
+name    = "Meteora DLMM BONK/SOL ($588K TVL, $1.36M/24h)"
+address = "6oFWm7KPLfxnwMb3z5xwBoXNSPP3JJyirAPqPSiVcnsp"
+dex     = "meteora-dlmm"
+
+[[pools]]
+name    = "Orca Whirlpool BONK/SOL ($1.01M TVL, $3K/24h — deep)"
+address = "3ne4mWqdYuNiYrYZC9TrA3FcfuFdErghH97vNPbjicr1"
+dex     = "orca-whirlpool"
+
+[[pools]]
+name    = "Raydium AMM v4 WIF/SOL ($5.67M TVL, $282K/24h)"
+address = "EP2ib6dYdEeqD8MfE2ezHCxX3kP3K2eLKkirfPm5eyMx"
+dex     = "raydium-amm-v4"
+
+[[pools]]
+name    = "Orca Whirlpool WIF/SOL ($373K TVL, $448K/24h)"
+address = "D6NdKrKNQPmRZCCnG1GqXtF7MMoHB7qR6GU5TkG59Qz1"
+dex     = "orca-whirlpool"
+
+[[pools]]
+name    = "Raydium AMM v4 POPCAT/SOL ($4M TVL, $254K/24h)"
+address = "FRhB8L7Y9Qq41qZXYLtC2nw8An1RJfLLxRF2x9RwLLMo"
+dex     = "raydium-amm-v4"
+
+[[pools]]
+name    = "Raydium AMM v4 POPCAT/USDC ($692K TVL, $65K/24h)"
+address = "HBS7a3br8GMMWuqVa7VB3SMFa7xVi1tSFdoF5w4ZZ3kS"
+dex     = "raydium-amm-v4"
+
+[[pools]]
+name    = "Raydium AMM v4 FWOG/SOL ($1.81M TVL, $287K/24h)"
+address = "AB1eu2L1Jr3nfEft85AuD2zGksUbam1Kr8MR3uM2sjwt"
+dex     = "raydium-amm-v4"
+
+[[pools]]
+name    = "Raydium AMM v4 PONKE/SOL ($1.73M TVL, $190K/24h)"
+address = "5uTwG3y3F5cx4YkodgTjWEHDrX5HDKZ5bZZ72x8eQ6zE"
+dex     = "raydium-amm-v4"
+
+# ============================================================
+# TAIL POOLS — added 2026-05-16 to widen arb surface
+# Curated from Dexscreener (vol >= $5k/24h, target tokens =
+# LSTs jitoSOL/mSOL/bSOL/INF, govs JUP/JTO/PYTH/RAY/JLP, memes BONK/WIF/POPCAT, stables PYUSD)
+# ============================================================
+
+[[pools]]
+name    = "Raydium AMM v4 RAY/SOL ($1474K TVL, $1502K/24h)"
+address = "2AXXcN6oN9bBT5owwmTH53C7QHUXvhLeu718Kqt8rvY2"
+dex     = "raydium-amm-v4"
+
+[[pools]]
+name    = "Meteora DLMM JUP/SOL ($1264K TVL, $718K/24h)"
+address = "C8Gr6AUuq9hEdSYJzoEpNcdjpojPZwqG5MtQbeouNNwg"
+dex     = "meteora-dlmm"
+
+[[pools]]
+name    = "Meteora DLMM JLP/USDC ($543K TVL, $214K/24h)"
+address = "5SHjDACvwtox5nY8kpWNYyaceWjtTG8C6L821D9Gtpjf"
+dex     = "meteora-dlmm"
+
+[[pools]]
+name    = "Meteora DLMM jitoSOL/SOL ($2370K TVL, $205K/24h)"
+address = "BoeMUkCLHchTD31HdXsbDExuZZfcUppSLpYtV3LZTH6U"
+dex     = "meteora-dlmm"
+
+[[pools]]
+name    = "Raydium AMM v4 RAY/USDC ($3936K TVL, $138K/24h)"
+address = "6UmmUiYoBjSrhakAobJw8BvkmJtDVxaeBtbt7rxWo1mg"
+dex     = "raydium-amm-v4"
+
+[[pools]]
+name    = "Meteora DLMM JLP/SOL ($193K TVL, $90K/24h)"
+address = "53RSBX3tsax8KLnEhm8ahScK1khySNPhHFSTPoZpZq2J"
+dex     = "meteora-dlmm"
+
+[[pools]]
+name    = "Orca Whirlpool BONK/SOL ($168K TVL, $80K/24h)"
+address = "5zpyutJu9ee6jFymDGoK7F6S5Kczqtc9FomP3ueKuyA9"
+dex     = "orca-whirlpool"
+
+[[pools]]
+name    = "Meteora DLMM mSOL/SOL ($1558K TVL, $68K/24h)"
+address = "HcjZvfeSNJbNkfLD4eEcRBr96AD3w1GpmMppaeRZf7ur"
+dex     = "meteora-dlmm"
+
+[[pools]]
+name    = "Meteora DLMM JUP/USDC ($20K TVL, $43K/24h)"
+address = "BhQEFZCRnWKQ21LEt4DUby7fKynfmLVJcNjfHNqjEF61"
+dex     = "meteora-dlmm"
+
+[[pools]]
+name    = "Orca Whirlpool PYTH/SOL ($28K TVL, $29K/24h)"
+address = "8erNF5u3CHrqZJXtkfY8CjSxFYF1yqHmN8uDbAhk6tWM"
+dex     = "orca-whirlpool"
+
+[[pools]]
+name    = "Meteora DLMM POPCAT/SOL ($100K TVL, $19K/24h)"
+address = "EbLiu3GfBYh9cfxrdrfhQgbZJmXqch38NmzZKZSkFGGq"
+dex     = "meteora-dlmm"
+
+[[pools]]
+name    = "Orca Whirlpool JUP/USDC ($53K TVL, $19K/24h)"
+address = "4Ui9QdDNuUaAGqCPcDSp191QrixLzQiLxJ1Gnqvz3szP"
+dex     = "orca-whirlpool"
+
+[[pools]]
+name    = "Orca Whirlpool POPCAT/SOL ($26K TVL, $17K/24h)"
+address = "AHTTzwf3GmVMJdxWM8v2MSxyjZj8rQR6hyAC3g9477Yj"
+dex     = "orca-whirlpool"
+
+[[pools]]
+name    = "Raydium AMM v4 JLP/SOL ($113K TVL, $16K/24h)"
+address = "8KbrpeSRYXYjWSSdG7gE1tR7Go8MmKKxKaei1gGc4U7Q"
+dex     = "raydium-amm-v4"
+
+[[pools]]
+name    = "Meteora DLMM JTO/USDC ($24K TVL, $15K/24h)"
+address = "Eqv1tJGkLFeH4giGy8vqKxF4NJBHtGR5cGmKG6cpVy4Z"
+dex     = "meteora-dlmm"
+
+[[pools]]
+name    = "Raydium AMM v4 JUP/SOL ($31K TVL, $10K/24h)"
+address = "EZVkeboWeXygtq8LMyENHyXdF5wpYrtExRNH9UwB1qYw"
+dex     = "raydium-amm-v4"
+
+[[pools]]
+name    = "Meteora DLMM PYTH/SOL ($50K TVL, $8K/24h)"
+address = "E4opVLVf8dkg72auPdZ8qWdKtTZBg9v89UffVWVr163E"
+dex     = "meteora-dlmm"
+
+[[pools]]
+name    = "Raydium AMM v4 PYUSD/USDC ($10K TVL, $6K/24h)"
+address = "H6fxtvWLFYSJ66mPJqoz7cg6tk32Pcgc9vXrywu4LEWk"
+dex     = "raydium-amm-v4"
+
+[[pools]]
+name    = "Meteora DLMM bSOL/SOL ($421K TVL, $5K/24h)"
+address = "DvWpLaNUPqoCGn4foM6hekAPKqMtADJJbJWhwuMiT6vK"
+dex     = "meteora-dlmm"

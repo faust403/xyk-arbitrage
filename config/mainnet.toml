@@ -1,0 +1,136 @@
+# Mainnet mode: live capital. Phase 11.4 starts here, gated by explicit
+# operator approval in Telegram. Every value below is validated strictly —
+# placeholders or empty wallet/program-id are rejected at boot.
+
+mode = "mainnet"
+
+[rpc]
+helius_api_key = "${HELIUS_API_KEY}"
+http_endpoint  = "https://mainnet.helius-rpc.com/?api-key=${HELIUS_API_KEY}"
+wss_endpoint   = "wss://atlas-mainnet.helius-rpc.com/?api-key=${HELIUS_API_KEY}"
+# Optional: set when on Helius Business plan for LaserStream gRPC access.
+# Leave commented out for Developer plan.
+# laserstream_endpoint = "${HELIUS_LASERSTREAM_URL}"
+
+[jito]
+block_engine_url     = "https://frankfurt.mainnet.block-engine.jito.wtf"
+default_tip_lamports = 10000
+
+[wallet]
+keypair_json      = "${SOLANA_KEYPAIR_JSON}"
+assert_program_id = "${ASSERT_PROGRAM_ID}"
+
+[solend]
+lending_market    = "4UpD2fh7xH3VP9QQaXtsS1YY3bxzWhtfpks7FatyKvdY"
+usdc_reserve      = "BgxfHJDzm44T7XG68MYKx7YisTjZu73tVovyZSjJMpmw"
+flash_loan_fee_bps = 9
+
+[telegram]
+bot_token        = "${TELEGRAM_BOT_TOKEN}"
+operator_chat_id = 429136864
+
+[risk]
+# Initial mainnet caps per INSTRUCTIONS.md Phase 11.4:
+# * MAX_FLASHLOAN_AMOUNT_USDC = 100_000_000  (100 USDC, 6 decimals)
+# * MIN_PROFIT_LAMPORTS       = 200_000      (~$0.03 — very conservative)
+# Operator raises via /tune after the 30-day mainnet-small phase clears.
+min_profit_lamports           = 200000
+max_flashloan_amount_usdc     = 100000000
+max_concurrent_opportunities  = 4
+
+[dexes]
+enabled = [
+    "raydium-amm-v4",
+    "raydium-clmm",
+    "orca-whirlpool",
+    "meteora-dlmm",
+    "lifinity-v2",
+]
+
+# The full live-pool list mirrors `config/scout-pools.toml` (the source of
+# truth used by the Phase −1 scout). Keep them in sync when expanding
+# coverage; future Phase 12 work may move both behind a shared include.
+[[pools]]
+name    = "Orca Whirlpool SOL/USDC ($9M TVL, $164M/24h)"
+address = "FpCMFDFGYotvufJ7HrFHsWEiiQCGbkLCtwHiDnh7o28Q"
+dex     = "orca-whirlpool"
+
+[[pools]]
+name    = "Orca Whirlpool SOL/USDC (large — $29M TVL, $61M/24h)"
+address = "Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE"
+dex     = "orca-whirlpool"
+
+[[pools]]
+name    = "Orca Whirlpool SOL/USDC (mid — $236K TVL, $170K/24h)"
+address = "7qbRF6YsyGuLUVs6Y1q64bdVrfe4ZcUUz1JRdoVNUJnm"
+dex     = "orca-whirlpool"
+
+[[pools]]
+name    = "Orca Whirlpool SOL/USDC (small — $201K TVL, $5.5K/24h)"
+address = "HJPjoWUrhoZzkNfRpHuieeFk9WcZWjwy6PBjZ81ngndJ"
+dex     = "orca-whirlpool"
+
+[[pools]]
+name    = "Raydium AMM v4 SOL/USDC (main — $7.8M TVL, $592K/24h)"
+address = "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2"
+dex     = "raydium-amm-v4"
+
+[[pools]]
+name    = "Raydium AMM v4 SOL/USDT ($1.17M TVL, $71K/24h)"
+address = "7XawhbbxtsRcQA8KTkHT9f9nc6d69UwqCDh6U5EEbEmX"
+dex     = "raydium-amm-v4"
+
+[[pools]]
+name    = "Raydium AMM v4 RAY/USDT (bridge for 3-cycles)"
+address = "DVa7Qmb5ct9RCpaU7UTpSaf3GVMYz17vNVU67XpdCRut"
+dex     = "raydium-amm-v4"
+
+[[pools]]
+name    = "Raydium CLMM SOL/USDC"
+address = "3ucNos4NbumPLZNWztqGHNFFgkHeRMBQAVemeeomsUxv"
+dex     = "raydium-clmm"
+
+[[pools]]
+name    = "Raydium CLMM USDC/USDT (0.01% tier)"
+address = "BZtgQEyS6eXUXicYPHecYQ7PybqodXQMvkjUbP4R8mUU"
+dex     = "raydium-clmm"
+
+[[pools]]
+name    = "Raydium CLMM USDC/USDT (0.05% tier)"
+address = "FPfbntAR84nyxfcmATEwYG55joLcPCxgYBC3BTPqB7yR"
+dex     = "raydium-clmm"
+
+[[pools]]
+name    = "Meteora DLMM SOL/USDC ($4.1M TVL, $21M/24h)"
+address = "5rCf1DM8LjKTw4YqhnoLcngyZYeNnQqztScTogYHAS6"
+dex     = "meteora-dlmm"
+
+[[pools]]
+name    = "Meteora DLMM SOL/USDC ($5.7M TVL, $9M/24h)"
+address = "BGm1tav58oGcsQJehL9WXBFXF7D27vZsKefj4xJKD5Y"
+dex     = "meteora-dlmm"
+
+[[pools]]
+name    = "Meteora DLMM SOL/USDC ($570K TVL — fast venue)"
+address = "HTvjzsfX3yU6BUodCjZ5vZkUrAxMDTrBs3CJaq43ashR"
+dex     = "meteora-dlmm"
+
+[[pools]]
+name    = "Meteora DLMM SOL/USDC ($1.1M TVL)"
+address = "HRYEjwdo3bZ1TpXKWKcezqiwSV2Ywuh4LxMa2PzoCnG6"
+dex     = "meteora-dlmm"
+
+[[pools]]
+name    = "Orca Whirlpool USDC/USDT (bridge)"
+address = "4fuUiYxTQ6QCrdSq9ouBYcTM7bqSwYTSyLueGZLTy4T4"
+dex     = "orca-whirlpool"
+
+[[pools]]
+name    = "Orca Whirlpool USDT/SOL (bridge)"
+address = "FwewVm8u6tFPGewAyHmWAqad9hmF7mvqxK4mJ7iNqqGC"
+dex     = "orca-whirlpool"
+
+[[pools]]
+name    = "Orca Whirlpool JitoSOL/USDC (bridge)"
+address = "CxvWVYvvSymLWQNLqo61zjr1L86B4HpxoELbAAjxyb8H"
+dex     = "orca-whirlpool"

@@ -1,0 +1,29 @@
+[package]
+name        = "arb-dex-obric"
+version     = { workspace = true }
+edition     = { workspace = true }
+rust-version = { workspace = true }
+license     = { workspace = true }
+publish     = { workspace = true }
+description = "Obric V2 (proprietary AMM with Pyth oracle anchoring) parser, quoter, and native swap-ix builder."
+
+[dependencies]
+arb-core            = { path = "../arb-core" }
+# `VaultLookup` is shared with arb-dex-raydium — both crates need SPL Token
+# vault balance lookups. Reuse rather than duplicate the trait.
+arb-dex-raydium     = { path = "../arb-dex-raydium" }
+
+solana-program = { workspace = true }
+async-trait    = { workspace = true }
+
+borsh          = { workspace = true }
+bytemuck       = { workspace = true }
+serde          = { workspace = true }
+
+anyhow         = { workspace = true }
+thiserror      = { workspace = true }
+tracing        = { workspace = true }
+
+[dev-dependencies]
+proptest       = { workspace = true }
+dashmap        = { workspace = true }

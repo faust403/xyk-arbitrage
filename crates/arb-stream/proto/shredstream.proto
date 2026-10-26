@@ -1,0 +1,22 @@
+// Minimal subset of jito-labs/shredstream-proxy's protobuf surface — only
+// the SubscribeEntries RPC we actually use. Lifted from
+// https://github.com/jito-labs/shredstream-proxy/blob/master/proto/shredstream.proto
+// and trimmed (Heartbeat / TraceShred / shared.Socket imports omitted so
+// the file is self-contained for tonic-build).
+
+syntax = "proto3";
+
+package shredstream;
+
+service ShredstreamProxy {
+  rpc SubscribeEntries(SubscribeEntriesRequest) returns (stream Entry);
+}
+
+message SubscribeEntriesRequest {}
+
+message Entry {
+  // the slot that the entry is from
+  uint64 slot = 1;
+  // Serialized bytes of Vec<solana_entry::entry::Entry> via bincode.
+  bytes entries = 2;
+}

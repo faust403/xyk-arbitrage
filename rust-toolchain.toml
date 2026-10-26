@@ -1,0 +1,8 @@
+[toolchain]
+# Bumped from 1.78 → 1.86 (April 2025): required by transitive deps in the
+# current Solana 2.0 release that adopted edition2024 (e.g. block-buffer 0.12,
+# digest 0.11). 1.85 is the first stable Rust with edition2024; pinning 1.86
+# for a small safety margin and to match recent rustup defaults.
+channel    = "1.88.0"
+components = ["rustfmt", "clippy"]
+profile    = "minimal"

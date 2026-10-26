@@ -1,0 +1,21 @@
+[features]
+seeds      = false
+skip-lint  = false
+
+[programs.localnet]
+assert_min_profit = "FAr3CSAHe6XHcvY3xK8tcXtTNbNrEC2pZqQ8VYy7ZkWA"
+
+[programs.devnet]
+# Replaced with the real program id after `anchor deploy --provider.cluster devnet`.
+# Operator updates `config/devnet.toml` and the .env `ASSERT_PROGRAM_ID` once known.
+assert_min_profit = "FAr3CSAHe6XHcvY3xK8tcXtTNbNrEC2pZqQ8VYy7ZkWA"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "localnet"
+wallet  = "~/.config/solana/id.json"
+
+[scripts]
+test = "cargo test --manifest-path programs/assert-min-profit/Cargo.toml -- --include-ignored"

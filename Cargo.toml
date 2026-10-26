@@ -1,35 +1,105 @@
-[package]
-name = "xyk-arbitrage"
-version = "0.1.0"
-edition = "2024"
+[workspace]
+resolver = "2"
+members = [
+    "crates/arb-core",
+    "crates/arb-scout",
+    "crates/arb-config",
+    "crates/arb-flashloan",
+    "crates/arb-jito",
+    "crates/arb-stream",
+    "crates/arb-pathfinder",
+    "crates/arb-dex-raydium",
+    "crates/arb-dex-orca",
+    "crates/arb-dex-meteora",
+    "crates/arb-dex-phoenix",
+    "crates/arb-dex-lifinity",
+    "crates/arb-dex-obric",
+    "crates/arb-telemetry",
+    "crates/arb-telegram",
+    "crates/arb-bot",
+]
+# The Anchor program lives outside the workspace — it has its own Cargo.toml
+# and is built via `anchor build`, not `cargo build --workspace`.
+exclude = ["programs/assert-min-profit"]
 
-[dependencies]
-anyhow = "1.0.103"
-rustls = { version = "0.23", default-features = false, features = ["ring"] }
-serde = { version = "1.0.228", features = ["derive"] }
-serde_norway = "0.9.42"
-solana-pubkey = "4.2.0"
-tokio = { version = "1.52.3", features = ["rt-multi-thread", "macros", "signal", "net"] }
-tracing = { version = "0.1.44", features = ["valuable"] }
-tracing-subscriber = { version = "0.3.23", features = ["env-filter", "chrono", "json", "valuable"] }
-valuable = { version = "0.1.1", features = ["derive"] }
-yellowstone-grpc-client = "13.2.0"
-yellowstone-grpc-proto = "12.5.0"
-futures = "0.3.34"
-solana-sdk = "4.0.1"
-solana-client = "4.2.2"
+[workspace.package]
+version = "0.1.12"
+edition = "2021"
+# MSRV bumped from 1.78 → 1.86 to satisfy transitive deps that now require
+# edition2024 (block-buffer 0.12, digest 0.11 via solana-sdk 2.0).
+rust-version = "1.88"
+license = "Proprietary"
+publish = false
+
+[workspace.dependencies]
+# Solana ecosystem — use solana-program for primitives only (scout reads, never signs).
+# Pinned to 2.0 per INSTRUCTIONS.md. solana-sdk pulled in transitively via solana-client.
+solana-program = "2.0"
+solana-client  = "2.0"
+solana-sdk     = "2.0"
+solana-account-decoder = "2.0"
+
+# Async runtime
+tokio       = { version = "1", features = ["macros", "rt-multi-thread", "signal", "sync", "time", "fs", "io-util"] }
+tokio-tungstenite = { version = "0.21", features = ["rustls-tls-webpki-roots"] }
+futures     = "0.3"
+async-trait = "0.1"
+
+# Telegram
+teloxide = { version = "0.13", features = ["macros"] }
+
+# Serialization & utility
+borsh       = { version = "1.5", features = ["derive"] }
+bytemuck    = { version = "1.18", features = ["derive"] }
+serde       = { version = "1", features = ["derive"] }
+serde_json  = "1"
+toml        = "0.8"
+anyhow      = "1"
+thiserror   = "1"
+tracing     = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+# Concurrency
+dashmap     = "6"
+arc-swap    = "1.7"
+
+# Math (precise integer math)
+num-bigint  = "0.4"
+
+# Base64 (Helius WSS account data is base64-encoded)
+base64      = "0.22"
+
+# Ed25519 signing without openssl-sys (avoids the Windows build wall solana-sdk hits)
+ed25519-dalek = "2"
+bs58        = "0.5"
+
+# HTTP (Jito explorer correlator + Telegram fallback)
+reqwest     = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+
+# Env
+dotenvy     = "0.15"
+
+# Time
+chrono      = { version = "0.4", default-features = false, features = ["clock", "serde"] }
+
+# Yellowstone gRPC client (Helius LaserStream). Pinned to specific
+# versions so cargo doesn't reroll to incompatible APIs between deploys.
+# v1.9.0+solana.1.16.1 was the snapshot Railway's Linux builder picked
+# last successfully — `subscribe()`-then-send pattern (no
+# `subscribe_with_request` on this version yet).
+yellowstone-grpc-client = { version = "=1.9.0+solana.1.16.1", default-features = false }
+yellowstone-grpc-proto  = { version = "=1.9.0+solana.1.16.1", default-features = false }
+
+# Testing
+proptest    = "1"
 
 [profile.release]
-overflow-checks = true
-lto = "fat"
+opt-level     = 3
+lto           = "thin"
 codegen-units = 1
-opt-level = 3
-panic = "abort"
-strip = "symbols"
-incremental = false
+debug         = false
+strip         = true
 
-[profile.release.build-override]
-opt-level = 3
-incremental = false
-codegen-units = 1
-strip = "symbols"
+[profile.dev]
+opt-level     = 0
+debug         = true

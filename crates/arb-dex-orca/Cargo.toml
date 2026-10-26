@@ -1,0 +1,29 @@
+[package]
+name        = "arb-dex-orca"
+version     = { workspace = true }
+edition     = { workspace = true }
+rust-version = { workspace = true }
+license     = { workspace = true }
+publish     = { workspace = true }
+description = "Orca Whirlpool (concentrated-liquidity) parser, quoter, and swap-instruction builder."
+
+[dependencies]
+arb-core            = { path = "../arb-core" }
+# Whirlpool's swap-ix builder shares the SPL TOKEN_PROGRAM constant with the
+# Raydium crate; rather than duplicate, we depend on it.
+arb-dex-raydium     = { path = "../arb-dex-raydium" }
+
+solana-program = { workspace = true }
+async-trait    = { workspace = true }
+
+base64         = { workspace = true }
+borsh          = { workspace = true }
+bytemuck       = { workspace = true }
+serde          = { workspace = true }
+
+anyhow         = { workspace = true }
+thiserror      = { workspace = true }
+tracing        = { workspace = true }
+
+[dev-dependencies]
+proptest       = { workspace = true }

@@ -1,0 +1,28 @@
+[package]
+name        = "arb-dex-raydium"
+version     = { workspace = true }
+edition     = { workspace = true }
+rust-version = { workspace = true }
+license     = { workspace = true }
+publish     = { workspace = true }
+description = "Raydium AMM v4 + CLMM parser, quoter, and swap-instruction builder."
+
+[dependencies]
+arb-core       = { path = "../arb-core" }
+
+solana-program = { workspace = true }
+async-trait    = { workspace = true }
+
+borsh          = { workspace = true }
+bytemuck       = { workspace = true }
+serde          = { workspace = true }
+serde_json     = { workspace = true }
+
+dashmap        = { workspace = true }
+
+anyhow         = { workspace = true }
+thiserror      = { workspace = true }
+tracing        = { workspace = true }
+
+[dev-dependencies]
+proptest       = { workspace = true }

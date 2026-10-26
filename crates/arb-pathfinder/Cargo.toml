@@ -1,0 +1,22 @@
+[package]
+name        = "arb-pathfinder"
+version     = { workspace = true }
+edition     = { workspace = true }
+rust-version = { workspace = true }
+license     = { workspace = true }
+publish     = { workspace = true }
+description = "Multi-hop arbitrage pathfinder + per-route ternary-search optimal sizing."
+
+[dependencies]
+arb-core       = { path = "../arb-core" }
+arb-stream     = { path = "../arb-stream" }
+
+solana-program = { workspace = true }
+
+serde          = { workspace = true }
+anyhow         = { workspace = true }
+thiserror      = { workspace = true }
+tracing        = { workspace = true }
+
+[dev-dependencies]
+proptest       = { workspace = true }

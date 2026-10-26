@@ -1,0 +1,11 @@
+# Day-1 single-pool smoke test config.
+# Use to verify WSS connectivity + parsing without exercising the full scout.
+#
+# 🛑 Replace the address with a real mainnet Raydium SOL/USDC pool address.
+
+[[pools]]
+name    = "Raydium AMM v4 SOL/USDC (smoke test)"
+address = "REPLACE_ME_RAYDIUM_SOL_USDC"
+dex     = "raydium-amm-v4"
+token_a = "So11111111111111111111111111111111111111112"
+token_b = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"

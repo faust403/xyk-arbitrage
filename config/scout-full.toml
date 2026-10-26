@@ -1,0 +1,17 @@
+# Production scout config — symlink or copy from scout-pools.toml after the
+# operator has filled in the placeholder addresses.
+#
+# This file is a deliberate alias so `arb-scout` (which defaults to
+# `config/scout-full.toml`) finds something. Until the operator fills in real
+# addresses, scout-pools.toml is the authoritative editing surface.
+
+# Re-include the same content. TOML doesn't support file include; the operator
+# can either:
+#   (a) keep this file in sync with scout-pools.toml manually, OR
+#   (b) `cp config/scout-pools.toml config/scout-full.toml` after each edit, OR
+#   (c) symlink: `ln -s scout-pools.toml config/scout-full.toml` (Linux/macOS).
+#
+# For now, an empty `[[pools]]` will be rejected by config validation — that's
+# the intentional "you must configure this" gate.
+
+# ⚠️ EMPTY ON PURPOSE — fill from scout-pools.toml

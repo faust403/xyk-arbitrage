@@ -1,0 +1,45 @@
+# Devnet mode: end-to-end testing on devnet (Phase 11.2). The Anchor program
+# is deployed to devnet first; `assert_program_id` must be set to the result.
+# Devnet has limited DEX coverage — accept that the pool list is stubby.
+
+mode = "devnet"
+
+[rpc]
+helius_api_key = "${HELIUS_API_KEY}"
+http_endpoint  = "https://devnet.helius-rpc.com/?api-key=${HELIUS_API_KEY}"
+wss_endpoint   = "wss://devnet.helius-rpc.com/?api-key=${HELIUS_API_KEY}"
+
+[jito]
+# Jito doesn't run a public devnet block engine — we keep the mainnet URL in
+# the field so deserialisation succeeds, but the executor MUST switch to
+# direct sendTransaction when `mode == Devnet` (handled in Phase 8).
+block_engine_url     = "https://frankfurt.mainnet.block-engine.jito.wtf"
+default_tip_lamports = 0
+
+[wallet]
+keypair_json      = "${SOLANA_KEYPAIR_JSON}"
+assert_program_id = "${ASSERT_PROGRAM_ID}"
+
+[solend]
+# Solend may not be deployed on devnet in usable form. Treated as
+# placeholder addresses for parsing only; flash-loan paths are skipped when
+# mode == Devnet.
+lending_market = "4UpD2fh7xH3VP9QQaXtsS1YY3bxzWhtfpks7FatyKvdY"
+usdc_reserve   = "BgxfHJDzm44T7XG68MYKx7YisTjZu73tVovyZSjJMpmw"
+
+[telegram]
+bot_token        = "${TELEGRAM_BOT_TOKEN}"
+operator_chat_id = 429136864
+
+[risk]
+# Devnet airdrop ceiling is small — keep capital trivial.
+min_profit_lamports       = 1000
+max_flashloan_amount_usdc = 0
+
+[dexes]
+enabled = ["raydium-amm-v4", "orca-whirlpool"]
+
+# Devnet pools: leave empty until the operator names devnet-deployed pools
+# they want to monitor. Phase 11.2 explicitly says "limited DEX coverage on
+# devnet — accept this".
+pools = []

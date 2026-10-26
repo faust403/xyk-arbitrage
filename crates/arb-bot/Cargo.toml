@@ -1,0 +1,43 @@
+[package]
+name        = "arb-bot"
+version     = { workspace = true }
+edition     = { workspace = true }
+rust-version = { workspace = true }
+license     = { workspace = true }
+publish     = { workspace = true }
+description = "Main arbbot binary — orchestrator wiring stream/strategy/executor/telegram/telemetry."
+
+[[bin]]
+name = "arb-bot"
+path = "src/main.rs"
+
+[dependencies]
+arb-core         = { path = "../arb-core" }
+arb-config       = { path = "../arb-config" }
+arb-stream       = { path = "../arb-stream" }
+arb-pathfinder   = { path = "../arb-pathfinder" }
+arb-jito         = { path = "../arb-jito" }
+arb-flashloan    = { path = "../arb-flashloan" }
+arb-telemetry    = { path = "../arb-telemetry" }
+arb-telegram     = { path = "../arb-telegram" }
+arb-dex-raydium  = { path = "../arb-dex-raydium" }
+arb-dex-orca     = { path = "../arb-dex-orca" }
+arb-dex-meteora  = { path = "../arb-dex-meteora" }
+arb-dex-phoenix  = { path = "../arb-dex-phoenix" }
+arb-dex-lifinity = { path = "../arb-dex-lifinity" }
+
+tokio          = { workspace = true }
+futures        = { workspace = true }
+
+serde          = { workspace = true }
+serde_json     = { workspace = true }
+
+anyhow         = { workspace = true }
+thiserror      = { workspace = true }
+tracing        = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+dotenvy        = { workspace = true }
+
+[dev-dependencies]
+proptest       = { workspace = true }

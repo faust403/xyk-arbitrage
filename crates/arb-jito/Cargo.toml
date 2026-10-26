@@ -1,0 +1,36 @@
+[package]
+name        = "arb-jito"
+version     = { workspace = true }
+edition     = { workspace = true }
+rust-version = { workspace = true }
+license     = { workspace = true }
+publish     = { workspace = true }
+description = "Jito bundle construction, tip-account rotation, simulation, and submission."
+
+[dependencies]
+arb-core       = { path = "../arb-core" }
+
+# Phase 0 stub — only solana-program is used here (no native-openssl deps on
+# Windows). solana-sdk / solana-client come in during Phase 8 once the actual
+# bundle builder + JSON-RPC client are wired; at that point we resolve the
+# Windows OpenSSL story (rustls feature or vendored build).
+solana-program = { workspace = true }
+
+tokio          = { workspace = true }
+async-trait    = { workspace = true }
+futures        = { workspace = true }
+
+serde          = { workspace = true }
+serde_json     = { workspace = true }
+borsh          = { workspace = true }
+
+reqwest        = { workspace = true }
+anyhow         = { workspace = true }
+thiserror      = { workspace = true }
+tracing        = { workspace = true }
+
+bs58           = { workspace = true }
+base64         = { workspace = true }
+
+[dev-dependencies]
+proptest       = { workspace = true }

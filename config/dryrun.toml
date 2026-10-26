@@ -1,0 +1,69 @@
+# Dry-run mode: full pipeline runs against live mainnet data, but no bundles
+# are submitted. Used for Phase 11.1 (mainnet-fork dry-run) and for local
+# development. Keypair / Anchor program id are not required.
+
+mode = "dryrun"
+
+[rpc]
+helius_api_key = "${HELIUS_API_KEY}"
+http_endpoint  = "https://mainnet.helius-rpc.com/?api-key=${HELIUS_API_KEY}"
+wss_endpoint   = "wss://atlas-mainnet.helius-rpc.com/?api-key=${HELIUS_API_KEY}"
+
+[jito]
+block_engine_url    = "https://frankfurt.mainnet.block-engine.jito.wtf"
+default_tip_lamports = 10000
+
+[wallet]
+# Not used in dryrun — the ATA derivation needs *some* pubkey for instruction
+# building during simulation; the System program id stands in safely.
+keypair_json      = ""
+assert_program_id = "11111111111111111111111111111111"
+
+[solend]
+lending_market = "4UpD2fh7xH3VP9QQaXtsS1YY3bxzWhtfpks7FatyKvdY"
+usdc_reserve   = "BgxfHJDzm44T7XG68MYKx7YisTjZu73tVovyZSjJMpmw"
+
+[telegram]
+bot_token        = "${TELEGRAM_BOT_TOKEN}"
+operator_chat_id = 429136864
+
+[risk]
+# Per INSTRUCTIONS.md hard rule #10: conservative defaults. No flash loans
+# in dryrun mode — even simulated borrows are noise here.
+min_profit_lamports       = 50000
+max_flashloan_amount_usdc = 0
+
+[dexes]
+enabled = ["raydium-amm-v4", "raydium-clmm", "orca-whirlpool", "meteora-dlmm"]
+
+# Pool list mirrors `config/scout-pools.toml` (the canonical scout list).
+# Keep them in sync when adjusting coverage.
+[[pools]]
+name    = "Orca Whirlpool SOL/USDC (top)"
+address = "FpCMFDFGYotvufJ7HrFHsWEiiQCGbkLCtwHiDnh7o28Q"
+dex     = "orca-whirlpool"
+
+[[pools]]
+name    = "Orca Whirlpool SOL/USDC (large)"
+address = "Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE"
+dex     = "orca-whirlpool"
+
+[[pools]]
+name    = "Raydium AMM v4 SOL/USDC"
+address = "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2"
+dex     = "raydium-amm-v4"
+
+[[pools]]
+name    = "Raydium CLMM SOL/USDC"
+address = "3ucNos4NbumPLZNWztqGHNFFgkHeRMBQAVemeeomsUxv"
+dex     = "raydium-clmm"
+
+[[pools]]
+name    = "Meteora DLMM SOL/USDC"
+address = "5rCf1DM8LjKTw4YqhnoLcngyZYeNnQqztScTogYHAS6"
+dex     = "meteora-dlmm"
+
+[[pools]]
+name    = "Orca Whirlpool USDC/USDT"
+address = "4fuUiYxTQ6QCrdSq9ouBYcTM7bqSwYTSyLueGZLTy4T4"
+dex     = "orca-whirlpool"

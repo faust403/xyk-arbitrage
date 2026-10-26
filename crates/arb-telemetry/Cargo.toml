@@ -1,0 +1,25 @@
+[package]
+name        = "arb-telemetry"
+version     = { workspace = true }
+edition     = { workspace = true }
+rust-version = { workspace = true }
+license     = { workspace = true }
+publish     = { workspace = true }
+description = "Bundle attempt logging, P&L computation, atomic state persistence."
+
+[dependencies]
+arb-core       = { path = "../arb-core" }
+
+tokio          = { workspace = true }
+
+serde          = { workspace = true }
+serde_json     = { workspace = true }
+chrono         = { workspace = true }
+
+anyhow         = { workspace = true }
+thiserror      = { workspace = true }
+tracing        = { workspace = true }
+
+[dev-dependencies]
+tempfile       = "3"
+proptest       = { workspace = true }

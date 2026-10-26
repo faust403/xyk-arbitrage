@@ -1,0 +1,58 @@
+[package]
+name        = "arb-stream"
+version     = { workspace = true }
+edition     = { workspace = true }
+rust-version = { workspace = true }
+license     = { workspace = true }
+publish     = { workspace = true }
+description = "Streaming backends (Helius Enhanced WSS / LaserStream gRPC) + lock-free PoolStateStore."
+
+[dependencies]
+arb-core       = { path = "../arb-core" }
+
+# Phase 0 stub — only solana-program (the scout's Windows-friendly subset).
+# solana-sdk / solana-client / yellowstone-grpc-client come in during Phase 6
+# once the actual streaming backend is wired.
+solana-program = { workspace = true }
+
+tokio          = { workspace = true }
+tokio-tungstenite = { workspace = true }
+async-trait    = { workspace = true }
+futures        = { workspace = true }
+
+serde          = { workspace = true }
+serde_json     = { workspace = true }
+
+dashmap        = { workspace = true }
+arc-swap       = { workspace = true }
+
+base64         = { workspace = true }
+bs58           = { workspace = true }
+anyhow         = { workspace = true }
+thiserror      = { workspace = true }
+tracing        = { workspace = true }
+
+# Yellowstone gRPC (LaserStream backend) is gated by the `laserstream`
+# feature. It pulls tonic + prost + a chain of C-build native deps
+# (openssl-sys via tonic's transport) that break the Windows dev build.
+# Production deploys on Linux (Railway / bare-metal Frankfurt) compile it
+# fine; flip the feature there with `--features laserstream`.
+yellowstone-grpc-client = { workspace = true, optional = true }
+yellowstone-grpc-proto  = { workspace = true, optional = true }
+
+# Shredstream gRPC client (Jito ShredStream Proxy) — gated by `shredstream`
+# feature. Reuses the tonic 0.9 / prost 0.11 chain already pinned by
+# yellowstone-grpc-client to avoid duplicate-version bloat.
+tonic         = { version = "0.9", optional = true }
+prost         = { version = "0.11", optional = true }
+
+[build-dependencies]
+tonic-build   = { version = "0.9", optional = true }
+
+[features]
+default       = []
+laserstream   = ["dep:yellowstone-grpc-client", "dep:yellowstone-grpc-proto"]
+shredstream   = ["dep:tonic", "dep:prost", "dep:tonic-build"]
+
+[dev-dependencies]
+proptest       = { workspace = true }
