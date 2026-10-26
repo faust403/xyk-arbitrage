@@ -1,2 +1,68 @@
-/target
+# Build artifacts
+/target/
+**/*.rs.bk
+Cargo.lock.bak
 /configs
+
+# Secrets — never commit
+.env
+.env.local
+*.keypair.json
+keypair*.json
+*-keypair.json
+secrets/
+# Railway env dumps (contain SOLANA_KEYPAIR_JSON + HELIUS_API_KEY)
+rvars.json
+rvars*.json
+env.txt
+
+# Temporary scratch files (debug dumps, in-flight patches)
+.tmp_*
+_t.json
+kamino_check.json
+newest.json
+revlast.json
+
+# Local debugging files (txs, signatures, scratch scripts)
+rl*.txt
+sigs*.json
+sigs*.txt
+tx_list.txt
+usdt_tx.json
+banks*.json
+flashx_nonce.py
+check_*.py
+decode_*.py
+derive_*.py
+dump_*.py
+fetch_*.py
+find_*.py
+parse_*.py
+probe_*.py
+sample_*.py
+bot-local.log
+*.log
+pump_idl.json
+pump_idl.ts
+run-bot-local.ps1
+
+# Claude Code local config (per-user, do not share)
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+.claude/scheduled_tasks.lock.*
+
+# Runtime state — gitignored per INSTRUCTIONS.md
+state/
+logs/
+
+# IDE / editor
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Coverage reports
+tarpaulin-report.html
+*.profraw
+*.profdata

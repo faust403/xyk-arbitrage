@@ -1,0 +1,35 @@
+# Build artifacts — re-built fresh inside the container.
+target/
+
+# Local secrets / runtime state — must never leak into the image.
+.env
+.env.*
+*.keypair.json
+keypair*.json
+*-keypair.json
+secrets/
+state/
+logs/
+
+# Git internals — not needed at runtime.
+.git/
+.github/
+.gitignore
+
+# Editor / IDE detritus.
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Coverage reports.
+tarpaulin-report.html
+*.profraw
+*.profdata
+
+# Documentation that doesn't ship in the image.
+README.md
+INSTRUCTIONS.md
+docs/
